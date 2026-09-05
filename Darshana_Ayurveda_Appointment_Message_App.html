@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#315c4c">
+<title>Darshana Ayurveda — Appointment Messages</title>
+<style>
+:root{
+  --green:#315c4c; --green2:#3f735f; --cream:#f7f5ef; --card:#fff;
+  --text:#24342d; --muted:#718078; --line:#dfe6e1;
+  --shadow:0 10px 30px rgba(39,67,56,.09);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--text)}
+.container{max-width:920px;margin:auto;padding:24px 16px 40px}
+header{background:linear-gradient(135deg,var(--green),#25483c);color:#fff;border-radius:22px;padding:25px 24px;box-shadow:var(--shadow);margin-bottom:18px}
+.brand{font-size:13px;letter-spacing:1.6px;text-transform:uppercase;opacity:.8}
+h1{margin:6px 0 4px;font-size:27px}
+header p{margin:0;opacity:.82;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+label{display:block;font-weight:650;font-size:13px;margin:0 0 7px}
+input,select,textarea{width:100%;border:1px solid #d5ded9;border-radius:11px;padding:12px 13px;font-size:15px;background:#fff;color:var(--text);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--green2);box-shadow:0 0 0 3px rgba(63,115,95,.1)}
+.grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:13px}
+.types{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.type{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;font-weight:650;font-size:13px;color:var(--text)}
+.type.active{border-color:var(--green);background:#edf5f0;color:var(--green)}
+.type .icon{display:block;font-size:20px;margin-bottom:4px}
+.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.service{border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;background:#fff;cursor:pointer}
+.service.selected{background:#edf5f0;border-color:var(--green2);color:var(--green);font-weight:650}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+button{border:0;border-radius:11px;padding:12px 17px;font-size:14px;font-weight:700;cursor:pointer}
+.primary{background:var(--green);color:#fff}.secondary{background:#edf2ef;color:var(--green)}
+.danger{background:#fff0ef;color:#a84d45}
+textarea{min-height:240px;resize:vertical;line-height:1.55}
+.preview-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.preview-title h2,.card h2{font-size:17px;margin:0}
+.badge{font-size:11px;padding:5px 8px;border-radius:20px;background:#edf5f0;color:var(--green);font-weight:700}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.info-box{background:#f8faf8;border-radius:12px;padding:13px}
+.info-box strong{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+details summary{cursor:pointer;font-weight:700;color:var(--green)}
+@media(max-width:700px){
+ .grid{grid-template-columns:1fr}
+ .types{grid-template-columns:repeat(2,1fr)}
+ .service-grid{grid-template-columns:repeat(2,1fr)}
+ .info{grid-template-columns:1fr}
+ header{border-radius:17px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="brand">Darshana Ayurveda Medical Centre</div>
+  <h1>Appointment Message Assistant</h1>
+  <p>Create a professional patient message in seconds.</p>
+</header>
+
+<section class="card">
+  <h2>1. Appointment details</h2><br>
+  <div class="grid">
+    <div><label>Patient name</label><input id="name" placeholder="e.g. Kasun Perera"></div>
+    <div><label>Appointment date</label><input id="date" type="date"></div>
+    <div><label>Appointment time</label><input id="time" type="time"></div>
+  </div>
+  <br>
+  <label>Message type</label>
+  <div class="types">
+    <button class="type active" data-type="booked" onclick="setType(this,'booked')"><span class="icon">✅</span>Booked</button>
+    <button class="type" data-type="rescheduled" onclick="setType(this,'rescheduled')"><span class="icon">🔄</span>Rescheduled</button>
+    <button class="type" data-type="cancelled" onclick="setType(this,'cancelled')"><span class="icon">❌</span>Cancelled</button>
+    <button class="type" data-type="missed" onclick="setType(this,'missed')"><span class="icon">💬</span>Missed</button>
+  </div>
+  <br>
+  <label>Service (optional)</label>
+  <div class="service-grid" id="services"></div>
+  <div class="actions">
+    <button class="primary" onclick="generate()">Generate message</button>
+    <button class="secondary" onclick="clearForm()">Clear</button>
+  </div>
+</section>
+
+<section class="card">
+  <div class="preview-title"><h2>2. Message</h2><span class="badge" id="statusBadge">BOOKED</span></div>
+  <textarea id="message" placeholder="Your generated message will appear here..."></textarea>
+  <div class="actions">
+    <button class="primary" onclick="copyMessage()">Copy message</button>
+    <button class="secondary" onclick="openWhatsApp()">Open WhatsApp</button>
+  </div>
+  <p class="small" style="margin-bottom:0">For WhatsApp, enter the patient's number in the WhatsApp app/contact first. This button opens WhatsApp with the generated text ready to paste.</p>
+</section>
+
+<section class="card">
+  <details>
+    <summary>Clinic information included in messages</summary>
+    <br>
+    <div class="info">
+      <div class="info-box"><strong>Opening hours</strong>Monday – Saturday: 6.00 PM – 9.00 PM<br>Sunday: 10.00 AM – 9.00 PM</div>
+      <div class="info-box"><strong>Location</strong><a href="https://maps.app.goo.gl/a9kFNzEFKf7QVFT28?g_st=ic" target="_blank">Open Google Maps location</a></div>
+    </div>
+    <br>
+    <div class="small"><strong>Conditions:</strong> Arthritis · Back Pain · Back & Neck Pains · Migraine · Sinusitis · Gastritis · Hemorrhoids · Diabetes · Chronic Kidney Diseases</div>
+    <br>
+    <div class="small"><strong>Wellness:</strong> Head Massage · Neck & Shoulder Massage · Back Massage · Foot & Leg Massage · Full Body Massage · Steam Bath (Sitting Type) · Nasya Treatments · Weight Loss Treatment · Anti-Stress Treatment</div>
+  </details>
+</section>
+</div>
+
+<script>
+const services = [
+"Arthritis","Back Pain","Back & Neck Pains","Migraine","Sinusitis","Gastritis",
+"Hemorrhoids","Diabetes","Chronic Kidney Diseases","Head Massage","Neck & Shoulder Massage",
+"Back Massage","Foot & Leg Massage","Full Body Massage","Steam Bath (Sitting Type)",
+"Nasya Treatments","Weight Loss Treatment","Anti-Stress Treatment"
+];
+let type="booked", selectedService="";
+
+const serviceBox=document.getElementById("services");
+services.forEach(s=>{
+ const b=document.createElement("button"); b.className="service"; b.textContent=s;
+ b.onclick=()=>{selectedService=(selectedService===s?"":s); [...serviceBox.children].forEach(x=>x.classList.toggle("selected",x.textContent===selectedService));};
+ serviceBox.appendChild(b);
+});
+
+function setType(el,t){
+ type=t;
+ document.querySelectorAll(".type").forEach(x=>x.classList.remove("active"));
+ el.classList.add("active");
+ document.getElementById("statusBadge").textContent=t.toUpperCase();
+}
+function formatDate(v){
+ if(!v) return "[Appointment Date]";
+ const d=new Date(v+"T00:00:00");
+ return d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+}
+function formatTime(v){
+ if(!v) return "[Appointment Time]";
+ const [h,m]=v.split(":").map(Number);
+ const d=new Date(); d.setHours(h,m);
+ return d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+}
+function generate(){
+ const name=document.getElementById("name").value.trim() || "[Patient Name]";
+ const date=formatDate(document.getElementById("date").value);
+ const time=formatTime(document.getElementById("time").value);
+ const service=selectedService ? `\n\n🌿 Service: ${selectedService}` : "";
+ let msg="";
+ if(type==="booked"){
+  msg=`Hello ${name}, 👋\n\nThank you for choosing Darshana Ayurveda Medical Centre. Your appointment has been confirmed.\n\n📅 Date: ${date}\n⏰ Time: ${time}${service}\n\n📍 Location: https://maps.app.goo.gl/a9kFNzEFKf7QVFT28?g_st=ic\n\nPlease try to arrive a few minutes before your appointment time.\n\n🕐 Opening Hours\nMonday – Saturday: 6.00 PM – 9.00 PM\nSunday: 10.00 AM – 9.00 PM\n\nWe look forward to welcoming you. 🌿\n\nDarshana Ayurveda Medical Centre`;
+ } else if(type==="rescheduled"){
+  msg=`Hello ${name}, 👋\n\nYour appointment at Darshana Ayurveda Medical Centre has been successfully rescheduled.\n\n📅 New Date: ${date}\n⏰ New Time: ${time}${service}\n\n📍 Location: https://maps.app.goo.gl/a9kFNzEFKf7QVFT28?g_st=ic\n\nPlease save your new appointment time. If you need to make any further changes, please contact us.\n\nWe look forward to welcoming you. 🌿\n\nDarshana Ayurveda Medical Centre`;
+ } else if(type==="cancelled"){
+  msg=`Hello ${name},\n\nThis is to confirm that your appointment at Darshana Ayurveda Medical Centre scheduled for ${date} at ${time} has been cancelled.\n\nIf you would like to arrange another appointment, please feel free to contact us. We will be happy to assist you. 🌿\n\nThank you for choosing Darshana Ayurveda Medical Centre.`;
+ } else {
+  msg=`Hello ${name}, 👋\n\nWe hope you are doing well. We noticed that you were unable to attend your appointment at Darshana Ayurveda Medical Centre scheduled for ${date} at ${time}.\n\nIf you would like to reschedule, please contact us and we will be happy to arrange a convenient time for you. 🌿\n\nWe look forward to seeing you.\n\nDarshana Ayurveda Medical Centre`;
+ }
+ document.getElementById("message").value=msg;
+}
+async function copyMessage(){
+ const box=document.getElementById("message");
+ if(!box.value) generate();
+ try{await navigator.clipboard.writeText(box.value); alert("Message copied.");}
+ catch(e){box.select();document.execCommand("copy");alert("Message copied.");}
+}
+function openWhatsApp(){
+ if(!document.getElementById("message").value) generate();
+ const text=encodeURIComponent(document.getElementById("message").value);
+ window.open("https://wa.me/?text="+text,"_blank");
+}
+function clearForm(){
+ document.getElementById("name").value="";
+ document.getElementById("date").value="";
+ document.getElementById("time").value="";
+ document.getElementById("message").value="";
+ selectedService="";
+ document.querySelectorAll(".service").forEach(x=>x.classList.remove("selected"));
+}
+</script>
+</body>
+</html>
